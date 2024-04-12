@@ -35,7 +35,6 @@ class RemoteApi {
                     bufferedReader.forEachLine {
                         response.append(it.trim())
                     }
-                    // Deserialize JSON response to com.example.denemee.data.model.User object using Gson
                     // Deserialize JSON response to com.example.denemee.data.model.User object using JSONObject
                     val jsonResponse = JSONObject(response.toString())
 
