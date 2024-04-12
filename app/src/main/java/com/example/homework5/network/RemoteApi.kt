@@ -2,9 +2,10 @@ package com.example.homework5.network
 
 import com.example.homework5.data.model.LoginModel
 import com.example.homework5.data.model.User
-import com.google.gson.Gson
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -34,9 +35,23 @@ class RemoteApi {
                     bufferedReader.forEachLine {
                         response.append(it.trim())
                     }
-                    // Deserialize JSON response to User object using Gson
-                    val gson = Gson()
-                    val user = gson.fromJson(response.toString(), User::class.java)
+                    // Deserialize JSON response to com.example.denemee.data.model.User object using Gson
+                    // Deserialize JSON response to com.example.denemee.data.model.User object using JSONObject
+                    val jsonResponse = JSONObject(response.toString())
+
+                    val user = User(
+                        jsonResponse.getString("userId"),
+                        jsonResponse.getString("fullName"),
+                        jsonResponse.getString("email"),
+                        jsonResponse.getString("password"),
+                        jsonResponse.getString("phoneNumber"),
+                        jsonResponse.getString("occupation"),
+                        jsonResponse.getString("employer"),
+                        jsonResponse.getString("country"),
+                        jsonResponse.getString("latitude"),
+                        jsonResponse.getString("longitude"),
+                    )
+
                     callback(user, null) // Callback with user data and no error
                 }
             } catch (e: Exception) {
@@ -63,14 +78,16 @@ class RemoteApi {
 
             try {
                 // Serialize LoginModel object to JSON using Gson
-                val gson = Gson()
-                val jsonUser = gson.toJson(loginModel)
+                val jsonUser = JSONObject().apply {
+                    put("email", loginModel.email)
+                    put("password", loginModel.password)
+                }
 
                 // Write JSON data to output stream
-                val outputStream = connection.outputStream
-                outputStream.write(jsonUser.toByteArray())
-                outputStream.flush()
-                outputStream.close()
+                val outputStreamWriter  = OutputStreamWriter(connection.outputStream)
+                outputStreamWriter.write(jsonUser.toString())
+                outputStreamWriter.flush()
+                outputStreamWriter.close()
 
                 // Read response from input stream
                 val reader = InputStreamReader(connection.inputStream)
